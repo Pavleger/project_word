@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title></title>
+</head>
+<style>
+	.jopa{display: inline-block;margin-left: 10px;border-radius: 5px;border: 5px double #2989a9;background-color: #9ae2cd; margin-top: 10px;height: 50px;
+	}
+	.not_dragged{display: inline-block;margin-left: 10px;border-radius: 5px;border: 5px double #2ad032;background-color: #43f84c;margin-top: 10px;height: 50px;size: 300px;
+	}
+	#otvet{position: relative; margin-left: 45%;}
+</style>
+<body>
+	<div id="canvas_game" style="width: 100%; height: 30%; background-color: #9bffea; position: static; margin: auto;">
+		<p id="otvet">  </p>
+		<div class="CCC" id="hhh" style="width: 100%; height: 400px; background-color: #9bffea; te" >
+		</div>
+	</div>
+	<div style="position: fixed; margin: auto;" id="div_less">
+		<textarea id="txt_get"></textarea>
+		<button onclick="clk('inp', 0)" >Готово</button>
+		<button onclick="createUrlForTask()">сохранить</button>
+	</div>
+	<script src="RubaXa-Sortable-master/Sortable.js"></script>
+	<script>
+		let fraze_array = []
+		let fraze_number = 0 
+		let answer_count = 0
+		let array_en = []
+		let array_rus = []
+		let count_lesson = 0
+		let workk
+		if (document.location.href.split("#").length>1) {
+			document.getElementById('txt_get').value=atou(document.location.href.split("#")[1])
+			clk("inp", 0)
+			document.getElementById('div_less').style.display = "none"
+		}
+		
+		//Encode
+		function utoa(str) {return window.btoa(unescape(encodeURIComponent(str)))}
+		//Decode
+		function atou(str) {return decodeURIComponent(escape(window.atob(str)))}
+
+		function createUrlForTask(){
+		  let task = document.querySelector("#txt_get").value
+		  let url = document.location.href.split("#")[0]+"#"+utoa(task) // btoa(task)
+		  prompt("url ready", url)
+		}
+		function r_n(min, max) {
+			return Math.floor(Math.random() * (max - min)) + min;
+		}
+		function shuffle(array) {
+		  let currentIndex = array.length,  randomIndex;
+		  while (currentIndex != 0) {
+		    randomIndex = Math.floor(Math.random() * currentIndex);
+		    currentIndex--;
+		    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+		  }
+		  return array;
+		}
+		function sorting_word(array){
+		  let ok=false
+		  let oldArray = array.slice(0)
+		  let cnt=1000 // try count
+		  while(ok==false && cnt>0){
+		    cnt--
+		    ok=true
+		    shuffle(array)
+		    for(i=0;i<array.length;i++){
+		      if (array[i]==oldArray[i]) {
+		        ok=false
+		        // console.log (array.toString()+" - "+oldArray.toString()+" / "+array[i]+" / "+oldArray[i]+" / "+i)
+		      }
+		    }
+		  }
+		  return array
+		}
+		function create_word_elevent(el, arr){
+			let word_1 = document.createElement("div")
+			let word_2 = document.createElement("p")
+			document.getElementById("hhh").appendChild(word_1)
+			word_1.appendChild(word_2)
+			word_2.innerHTML = arr[el]
+			// arr.splice(el, 1)
+			word_1.className = "jopa"
+			word_1.draggable = "true"
+			word_2.style.marginTop = "auto"
+			word_2.style.fontSize = "40px"
+			// word_1.setAttribute('style','display: inline-block;margin-left: 10px;border-radius: 5px;border: 5px double black;background-color: blue;margin-top: 10px;width: 100px;height: 50px;positioncenter;size: 300px;');
+		}
+		function clk(idishnik, lesson_num_fun){
+			if (lesson_num_fun == 0) {
+				count_lesson = 0;
+			}
+			answer_count = 0
+			array_en = document.getElementById('txt_get').value.split("\n")[lesson_num_fun].split("|")[0];
+			array_rus = document.getElementById('txt_get').value.split("\n")[lesson_num_fun].split("|")[1];
+			document.getElementById("hhh").innerHTML = ""
+			document.getElementById('otvet').innerHTML = array_rus
+			workk = array_en.split(" ")
+			fraze_array = array_en.split(" ")
+			sorting_word(workk)
+			for (let i = 0; i < workk.length; i++) {
+				create_word_elevent(i, workk)
+			}
+			give_id("jopa")
+		}
+		
+		function drag_on(){
+			let sortable = Sortable.create(document.getElementById("hhh"), {animation: 150, filter: ".not_dragged",
+				onEnd: function(evt){
+					answer_count = 0;
+					for (var i = 0; i < fraze_array.length; i++) {
+						if (document.getElementById("hhh").childNodes[i].childNodes[0].innerHTML == fraze_array[i]) {
+							document.getElementById("hhh").childNodes[i].className = "not_dragged";
+							answer_count+=1
+							if (answer_count==fraze_array.length-1 && answer_count!=array_en.length) {
+								setTimeout(Next_level, 5000)
+							}
+						} else {document.getElementById("hhh").childNodes[i].className = "jopa"}
+					} 
+				}, 
+			});
+		}
+		function Next_level(){
+			count_lesson += 1
+			clk('inp', count_lesson)
+		}
+		drag_on()
+		function give_id(name){
+			let scroll = document.getElementsByClassName(name)
+			for (let i = 0; i < scroll.length; i++) {
+				scroll[i].id = "jopa_"+i
+				scroll[i].style.width = workk[i].length*30+"px"
+			}
+		}
+		give_id("jopa")
+	</script>
+</body>
+</html>
